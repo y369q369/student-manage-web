@@ -26,7 +26,7 @@ export const useUserStore = defineStore("user", () => {
   const login = (loginData: ILoginRequestData) => {
     return new Promise((resolve, reject) => {
       loginApi({
-        username: loginData.username,
+        account: loginData.account,
         password: loginData.password,
         code: loginData.code
       })

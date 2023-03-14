@@ -17,16 +17,17 @@ const loading = ref(false)
 const codeUrl = ref("")
 /** 登录表单数据 */
 const loginForm: ILoginRequestData = reactive({
-  username: "admin",
-  password: "12345678",
+  account: "admin",
+  password: "admin",
   code: ""
 })
+
 /** 登录表单校验规则 */
 const loginFormRules: FormRules = {
-  username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
+  account: [{ required: true, message: "请输入用户名", trigger: "blur" }],
   password: [
     { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 8, max: 16, message: "长度在 8 到 16 个字符", trigger: "blur" }
+    { min: 5, max: 16, message: "长度在 5 到 16 个字符", trigger: "blur" }
   ],
   code: [{ required: true, message: "请输入验证码", trigger: "blur" }]
 }
@@ -37,7 +38,7 @@ const handleLogin = () => {
       loading.value = true
       useUserStore()
         .login({
-          username: loginForm.username,
+          account: loginForm.account,
           password: loginForm.password,
           code: loginForm.code
         })
@@ -46,7 +47,6 @@ const handleLogin = () => {
         })
         .catch(() => {
           createCode()
-          loginForm.password = ""
         })
         .finally(() => {
           loading.value = false
@@ -82,7 +82,7 @@ createCode()
         <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" @keyup.enter="handleLogin">
           <el-form-item prop="username">
             <el-input
-              v-model.trim="loginForm.username"
+              v-model.trim="loginForm.account"
               placeholder="用户名"
               type="text"
               tabindex="1"
