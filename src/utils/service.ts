@@ -107,3 +107,39 @@ function createRequestFunction(service: AxiosInstance) {
 export const service = createService()
 /** 用于网络请求的方法 */
 export const request = createRequestFunction(service)
+
+/** 导出 */
+export const exportData = function (url: string, params: object) {
+  return axios({
+    method: "get",
+    url,
+    params,
+    baseURL: import.meta.env.VITE_BASE_API,
+    timeout: 1000,
+    headers: {
+      Authorization: "Bearer " + getToken(),
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    responseType: "blob"
+  })
+    .then((data) => {
+      const status = data.status
+      if (status == 200) {
+        // 截取文件名，这里是后端返回了文件名+后缀，如果没有可以自己拼接
+        const fileName = decodeURI(data.headers["content-disposition"].replace("attachment;filename=", ""))
+        // 将`blob`对象转化成一个可访问的`url`
+        const url = window.URL.createObjectURL(new Blob([data.data]))
+        const link = document.createElement("a")
+        link.style.display = "none"
+        link.href = url
+        link.setAttribute("download", fileName)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+      return data
+    })
+    .catch((data) => {
+      console.log("导出失败", data)
+    })
+}

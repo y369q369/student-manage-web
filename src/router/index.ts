@@ -57,6 +57,54 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: "/workCompletion",
+    component: Layout,
+    redirect: "/workCompletion/index",
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/work-completion/index.vue"),
+        name: "workCompletion",
+        meta: {
+          title: "作业",
+          svgIcon: "unocss"
+        }
+      }
+    ]
+  },
+  {
+    path: "/user",
+    component: Layout,
+    redirect: "/user/index",
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/user/index.vue"),
+        name: "work",
+        meta: {
+          title: "用户",
+          svgIcon: "unocss"
+        }
+      }
+    ]
+  },
+  {
+    path: "/class",
+    component: Layout,
+    redirect: "/class/index",
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/class/index.vue"),
+        name: "class",
+        meta: {
+          title: "班级",
+          svgIcon: "unocss"
+        }
+      }
+    ]
+  },
+  {
     path: "/unocss",
     component: Layout,
     redirect: "/unocss/index",
