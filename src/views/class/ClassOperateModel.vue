@@ -75,19 +75,21 @@ defineExpose({
 
 <template>
   <el-dialog v-model="param.dialogVisible" :title="param.addFlag ? '新增' : '修改'" max>
-    <el-form ref="operateFormRef" :model="show.data" :rules="operateRules" label-width="120px">
-      <el-form-item label="班级" prop="name">
-        <el-input v-model.trim="show.data.name" size="large" />
-      </el-form-item>
-      <el-form-item label="班主任">
-        <el-select v-model="show.data.classTeacherId">
-          <el-option v-for="item in show.teacherList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="班级标语">
-        <el-input v-model="show.data.slogan" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" />
-      </el-form-item>
-    </el-form>
+    <el-card shadow="never" style="margin: 0 20px">
+      <el-form ref="operateFormRef" :model="show.data" :rules="operateRules" label-width="120px">
+        <el-form-item label="班级" prop="name">
+          <el-input v-model.trim="show.data.name" size="large" />
+        </el-form-item>
+        <el-form-item label="班主任">
+          <el-select v-model="show.data.classTeacherId">
+            <el-option v-for="item in show.teacherList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="班级标语">
+          <el-input v-model="show.data.slogan" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" />
+        </el-form-item>
+      </el-form>
+    </el-card>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="param.dialogVisible = false">取消</el-button>

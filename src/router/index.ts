@@ -1,4 +1,4 @@
-import { type RouteRecordRaw, createRouter, createWebHashHistory, createWebHistory } from "vue-router"
+import { RouteRecordRaw, createRouter, createWebHashHistory, createWebHistory } from "vue-router"
 
 const Layout = () => import("@/layout/index.vue")
 
@@ -67,7 +67,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "workCompletion",
         meta: {
           title: "作业",
-          svgIcon: "unocss"
+          svgIcon: "work-completion"
         }
       }
     ]
@@ -83,7 +83,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "work",
         meta: {
           title: "用户",
-          svgIcon: "unocss"
+          svgIcon: "user"
         }
       }
     ]
@@ -99,7 +99,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "class",
         meta: {
           title: "班级",
-          svgIcon: "unocss"
+          svgIcon: "class"
         }
       }
     ]

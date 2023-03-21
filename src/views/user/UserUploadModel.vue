@@ -53,23 +53,25 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="param.dialogVisible" title="用户导入" max>
-    <el-upload
-      ref="upload"
-      :action="importUserApi"
-      :limit="1"
-      :auto-upload="false"
-      :on-exceed="handleExceed"
-      :on-success="handleSuccess"
-      :on-error="handleError"
-      style="padding: 0 50px"
-    >
-      <el-button type="warning" :icon="Upload" size="large">文件选择</el-button>
-    </el-upload>
+  <el-dialog v-model="param.dialogVisible" title="用户导入">
+    <el-card shadow="never">
+      <el-upload
+        ref="upload"
+        :action="importUserApi"
+        :limit="1"
+        :auto-upload="false"
+        :on-exceed="handleExceed"
+        :on-success="handleSuccess"
+        :on-error="handleError"
+        style="padding: 0 50px"
+      >
+        <el-button type="warning" :icon="Upload" size="large">文件选择</el-button>
+      </el-upload>
+    </el-card>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="param.dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitUpload">上传</el-button>
+        <el-button type="primary" @click="submitUpload">导入</el-button>
       </span>
     </template>
   </el-dialog>

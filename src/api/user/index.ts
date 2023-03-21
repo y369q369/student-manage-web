@@ -35,7 +35,7 @@ export function getUserDetailApi(id: number) {
 /** 修改 */
 export function editUserApi(user: object) {
   return request<object>({
-    url: "user/edit",
+    url: "user/update",
     method: "put",
     data: user
   })

@@ -62,18 +62,20 @@ defineExpose({
 
 <template>
   <el-dialog v-model="param.dialogVisible" title="学生选择" max>
-    <el-transfer
-      style="padding: 20px 40px"
-      v-model="show.classStudentIdList"
-      :titles="['所有学生', '选中学生']"
-      :props="{
-        key: 'id',
-        label: 'name'
-      }"
-      filterable
-      :filter-method="filterMethod"
-      :data="show.operateStudentList"
-    />
+    <el-card style="margin: 0 20px">
+      <el-transfer
+        style="padding: 20px 40px"
+        v-model="show.classStudentIdList"
+        :titles="['所有学生', '选中学生']"
+        :props="{
+          key: 'id',
+          label: 'name'
+        }"
+        filterable
+        :filter-method="filterMethod"
+        :data="show.operateStudentList"
+      />
+    </el-card>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="param.dialogVisible = false">取消</el-button>

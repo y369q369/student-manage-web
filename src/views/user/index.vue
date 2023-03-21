@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
-import { Search, Plus, Edit, Delete, InfoFilled, RefreshLeft, Upload, Download } from "@element-plus/icons-vue"
+import { Search, CirclePlus, Plus, Edit, Delete, InfoFilled, RefreshLeft, Upload, Download } from "@element-plus/icons-vue"
 import UserAddModel from "./UserAddModel.vue"
 import UserEditModel from "./UserEditModel.vue"
 import UserUploadModel from "./UserUploadModel.vue"
@@ -94,63 +94,54 @@ getUserPageList()
 </script>
 
 <template>
-  <div style="padding: 0 20px; height: 100%">
-    <el-row style="height: 90px; line-height: 60px; padding-top: 20px">
-      <el-col :span="5" :offset="1">
-        <el-row>
-          <el-col :span="6" style="text-align: right">姓名</el-col>
-          <el-col :span="16" :offset="1">
-            <el-input v-model="user.query.name" placeholder="请输入姓名" size="large" />
-          </el-col>
-        </el-row>
-      </el-col>
-      <el-col :span="5">
-        <el-row>
-          <el-col :span="6" style="text-align: right">身份</el-col>
-          <el-col :span="16" :offset="1">
-            <el-select v-model="user.query.identity" class="m-2" placeholder="请选择身份" size="large">
-              <el-option
-                v-for="item in DataDict.list.identity"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-                size="large"
-              />
-            </el-select>
-          </el-col>
-        </el-row>
-      </el-col>
-      <el-col :span="2">
-        <el-button type="primary" :icon="Search" size="large" @click="getUserPageList">查询</el-button>
-      </el-col>
-    </el-row>
-    <el-row style="height: 60px">
-      <el-button type="primary" :icon="Plus" plain size="large" @click="addUser">新增</el-button>
-      <el-popconfirm
-        width="220"
-        confirm-button-text="确定"
-        cancel-button-text="取消"
-        :icon="InfoFilled"
-        icon-color="#626AEF"
-        @confirm="batchDeleteUser"
-        title="确认删除选中用户吗"
-      >
-        <template #reference>
-          <el-button type="danger" :icon="Delete" plain size="large" :disabled="multipleSelection.length === 0">
-            批量删除
-          </el-button>
-        </template>
-      </el-popconfirm>
-      <el-button type="warning" :icon="Upload" plain size="large" @click="importUser">导入</el-button>
-      <el-button color="green" :icon="Download" plain size="large" @click="exportUser">导出</el-button>
-    </el-row>
-    <el-row style="height: calc(100% - 190px)">
-      <el-col style="height: calc(100% - 80px)">
-        <el-table :data="user.tableList" @selection-change="handleSelectionChange" stripe style="height: 100%">
+  <div class="app-container">
+    <el-card shadow="never" class="search-wrapper">
+      <el-form :inline="true">
+        <el-form-item prop="username" label="姓名">
+          <el-input v-model="user.query.name" />
+        </el-form-item>
+        <el-form-item prop="phone" label="身份">
+          <el-select v-model="user.query.identity">
+            <el-option
+              v-for="item in DataDict.list.identity"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :icon="Search" @click="getUserPageList">查询</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card shadow="never">
+      <div style="margin-bottom: 20px">
+        <el-button type="primary" :icon="CirclePlus" @click="addUser">新增</el-button>
+        <el-popconfirm
+          width="220"
+          confirm-button-text="确定"
+          cancel-button-text="取消"
+          :icon="InfoFilled"
+          icon-color="#626AEF"
+          @confirm="batchDeleteUser"
+          title="确认删除选中用户吗"
+        >
+          <template #reference>
+            <el-button type="danger" :icon="Delete" :disabled="multipleSelection.length === 0">
+              批量删除
+            </el-button>
+          </template>
+        </el-popconfirm>
+        <el-button type="warning" :icon="Upload" @click="importUser">导入</el-button>
+        <el-button color="green" :icon="Download" @click="exportUser">导出</el-button>
+      </div>
+      <div class="table-wrapper">
+        <el-table :data="user.tableList" @selection-change="handleSelectionChange" stripe>
           <el-table-column type="selection" />
-          <el-table-column type="index" />
-          <el-table-column prop="name" label="名称" />
           <el-table-column prop="account" label="登录账号" />
+          <el-table-column prop="name" label="姓名" />
           <el-table-column label="身份">
             <template #default="scope">
               <span>{{ DataDict.type.identity[scope.row.identity] }}</span>
@@ -163,7 +154,7 @@ getUserPageList()
           </el-table-column>
           <el-table-column prop="birthDay" label="生日" />
           <el-table-column prop="phone" label="联系方式" />
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="180">
             <template #default="scope">
               <el-button
                 type="primary"
@@ -202,12 +193,12 @@ getUserPageList()
             </template>
           </el-table-column>
         </el-table>
-      </el-col>
-      <el-col style="width: 100%; padding-top: 20px; height: 40px">
+      </div>
+      <div class="pager-wrapper">
         <el-pagination
           style="float: right"
           background
-          layout="sizes, prev, pager, next"
+          layout="total, sizes, prev, pager, next, jumper"
           :page-sizes="[10, 20, 50, 100]"
           v-model:current-page="user.query.pageNo"
           v-model:page-size="user.query.pageSize"
@@ -215,10 +206,20 @@ getUserPageList()
           @size-change="getUserPageList"
           @current-change="getUserPageList"
         />
-      </el-col>
-    </el-row>
-    <UserAddModel ref="userAddRef" style="width: 1400px; height: 580px" @refresh="getUserPageList" />
-    <UserEditModel ref="userEditRef" style="width: 1400px; height: 580px" @refresh="getUserPageList" />
+      </div>
+    </el-card>
+
+    <UserAddModel ref="userAddRef" style="min-width: 1200px; width: 80%" @refresh="getUserPageList" />
+    <UserEditModel ref="userEditRef" style="width: 50%" @refresh="getUserPageList" />
     <UserUploadModel ref="userUploadRef" style="width: 500px" @refresh="getUserPageList" />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.search-wrapper {
+  margin-bottom: 20px;
+  :deep(.el-card__body) {
+    padding-bottom: 2px;
+  }
+}
+</style>

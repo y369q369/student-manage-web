@@ -62,6 +62,14 @@ export function getClassTeacherListApi(id: number) {
   })
 }
 
+/** 班级列表 */
+export function getClassListApi() {
+  return request<object>({
+    url: "class/list",
+    method: "get"
+  })
+}
+
 /** 班级学生分页列表 */
 export function getStudentPageListApi(data: object) {
   return request<object>({
@@ -74,7 +82,7 @@ export function getStudentPageListApi(data: object) {
 /** 班级所有学生列表 */
 export function getStudentListApi(id: number) {
   return request<object>({
-    url: "classStudent/list",
+    url: "classStudent/studentList",
     method: "get",
     params: {
       classId: id
