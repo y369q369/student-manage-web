@@ -3,7 +3,8 @@ import { ref, reactive } from "vue"
 import { Search, CirclePlus, Edit, Delete, InfoFilled } from "@element-plus/icons-vue"
 import ClassOperateModel from "./ClassOperateModel.vue"
 import StudentChooseModel from "./StudentChooseModel.vue"
-import { deleteClassApi, getClassPageListApi, getStudentPageListApi, batchDeleteStudentApi } from "@/api/class"
+import ApiPrefix from "@/constants/apiPrefix"
+import { getPageApi, deleteApi, batchDeleteApi } from "@/api/common"
 import { ElMessage } from "element-plus"
 
 const classOperateRef = ref()
@@ -38,7 +39,7 @@ const show = reactive({
 
 /* 列表 */
 const getClassPageList = () => {
-  getClassPageListApi(param.class).then((res) => {
+  getPageApi(ApiPrefix.class, param.class).then((res) => {
     show.class.tableList = res.data.records
     show.class.total = res.data.total
   })
@@ -51,7 +52,7 @@ const showDialog = (id: number | null) => {
 
 /* 删除 */
 const deleteClass = (id: number) => {
-  deleteClassApi(id).then((res) => {
+  deleteApi(ApiPrefix.class, id).then((res) => {
     ElMessage.success(res.data)
     getClassPageList()
   })
@@ -67,10 +68,9 @@ const chooseClass = (val: object | undefined) => {
 
 /* 学生列表 */
 const getStudentPageList = () => {
-  getStudentPageListApi(param.student).then((res) => {
+  getPageApi(ApiPrefix.classStudent, param.student).then((res) => {
     show.student.tableList = res.data.records
     show.student.total = res.data.total
-    console.log(show.student)
   })
 }
 
@@ -84,13 +84,13 @@ const handleSelectionChange = (val: Array<object>) => {
   multipleSelection.value = val
 }
 
-/* batchDeleteStudent */
+/* 批量删除 班级-学生 关系 */
 const batchDeleteStudent = () => {
   const studentIdList: number[] = []
   multipleSelection.value.forEach((item) => {
     studentIdList.push(item.id)
   })
-  batchDeleteStudentApi(param.student.classId, studentIdList).then((res) => {
+  batchDeleteApi(ApiPrefix.classStudent, studentIdList).then((res) => {
     ElMessage.success(res.data)
     getStudentPageList()
   })
@@ -134,12 +134,11 @@ getClassPageList()
                 <el-table-column prop="name" label="班级" min-width="90" />
                 <el-table-column prop="classTeacherName" label="班主任" min-width="90" />
                 <el-table-column prop="slogan" label="标语" min-width="150" />
-                <el-table-column label="操作" min-width="120">
+                <el-table-column label="操作" min-width="100">
                   <template #default="scope">
                     <el-button
                       type="primary"
                       :icon="Edit"
-                      size="small"
                       color="#626aef"
                       title="修改"
                       @click="showDialog(scope.row.id)"
@@ -154,7 +153,7 @@ getClassPageList()
                       title="确认删除吗"
                     >
                       <template #reference>
-                        <el-button type="danger" :icon="Delete" size="small" title="删除" />
+                        <el-button type="danger" :icon="Delete" title="删除" />
                       </template>
                     </el-popconfirm>
                   </template>
@@ -164,7 +163,6 @@ getClassPageList()
             <div class="pager-wrapper">
               <el-pagination
                 background
-                small
                 layout="total, sizes, prev, pager, next"
                 :page-sizes="[10, 20, 50, 100]"
                 v-model:current-page="param.class.pageNo"
@@ -239,7 +237,7 @@ getClassPageList()
             </div>
           </el-card>
         </el-card>
-        <StudentChooseModel ref="studentChooseRef" @refresh="getStudentPageList" style="width: 800px" />
+        <StudentChooseModel ref="studentChooseRef" @refresh="getStudentPageList" style="width: 1000px" />
       </el-main>
     </el-container>
   </div>

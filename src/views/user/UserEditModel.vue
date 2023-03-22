@@ -3,7 +3,8 @@ import { reactive, ref } from "vue"
 import { ElMessage, FormInstance, FormRules } from "element-plus"
 import DataDict from "@/constants/dataDict"
 import RegexValid from "@/constants/regexValid"
-import { getUserDetailApi, editUserApi } from "@/api/user"
+import ApiPrefix from "@/constants/apiPrefix"
+import { getDetailApi, updateApi } from "@/api/common"
 import { getCurrentInstance, ComponentInternalInstance } from "vue"
 
 const userRef = ref<FormInstance | null>(null)
@@ -47,8 +48,7 @@ const open = (userId) => {
 
 /** 查询用户 */
 const getUserDetail = (userId: number) => {
-  getUserDetailApi(userId).then((res) => {
-    console.log(res)
+  getDetailApi(ApiPrefix.user, { id: userId }).then((res) => {
     param.user = res.data
   })
 }
@@ -58,7 +58,7 @@ const editUser = () => {
   userRef.value?.validate((valid: boolean) => {
     if (valid) {
       delete param.user.account
-      editUserApi(param.user).then((res) => {
+      updateApi(ApiPrefix.user, param.user).then((res) => {
         ElMessage.success(res.data)
         param.dialogVisible = false
         proxy.$emit("refresh")
@@ -73,7 +73,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="param.dialogVisible" title="用户修改">
+  <el-dialog v-model="param.dialogVisible" :close-on-click-modal="false" title="用户修改">
     <el-card shadow="never" style="margin: 0 40px">
       <el-form ref="userRef" :model="param.user" :rules="userRules" label-width="150px">
         <el-form-item label="登录账号" prop="name">

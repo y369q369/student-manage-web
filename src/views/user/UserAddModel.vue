@@ -3,7 +3,8 @@ import { reactive } from "vue"
 import { Plus, Delete, ArrowUp, ArrowDown } from "@element-plus/icons-vue"
 import { ElMessage } from "element-plus"
 import DataDict from "@/constants/dataDict"
-import { batchAddApi } from "@/api/user"
+import ApiPrefix from "@/constants/apiPrefix"
+import { batchAddApi } from "@/api/common"
 import { getCurrentInstance, ComponentInternalInstance } from "vue"
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
@@ -66,7 +67,7 @@ const batchAddUser = () => {
     if (errorIndexArr.length > 0) {
       ElMessage.error("第" + errorIndexArr + "项 用户名/登录账号 为空")
     } else {
-      batchAddApi(param.list).then((res) => {
+      batchAddApi(ApiPrefix.user, param.list).then((res) => {
         ElMessage.success(res.data)
         param.dialogVisible = false
         param.list = [{ ...defaultUser }]
@@ -86,7 +87,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="param.dialogVisible" title="用户新增" top="10vh">
+  <el-dialog v-model="param.dialogVisible" :close-on-click-modal="false" title="用户新增" top="10vh">
     <el-card shadow="never" style="margin: 0 20px">
       <el-table :data="param.list" stripe style="width: 100%; height: calc(80vh - 200px)">
         <el-table-column type="index" />

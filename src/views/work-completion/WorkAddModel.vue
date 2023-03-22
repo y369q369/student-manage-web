@@ -2,8 +2,9 @@
 import { reactive } from "vue"
 import { ElMessage } from "element-plus"
 import DataDict from "@/constants/dataDict"
-import { getClassListApi, getStudentListApi } from "@/api/class"
-import { batchAddApi } from "@/api/work-completion"
+import ApiPrefix from "@/constants/apiPrefix"
+import { getListApi, batchAddApi } from "@/api/common"
+import { studentListPrefix } from "@/api/class"
 import { getCurrentInstance, ComponentInternalInstance } from "vue"
 import dayjs from "dayjs"
 
@@ -16,12 +17,19 @@ const param = reactive({
 })
 
 const show = reactive({
-  classList: [
+  courseList: [
     {
-      id: 0,
+      id: null,
       name: ""
     }
   ],
+  classList: [
+    {
+      id: null,
+      name: ""
+    }
+  ],
+  courseId: null,
   classId: 1,
   statisticsTime: null,
   studentList: [],
@@ -35,12 +43,17 @@ const open = () => {
   if (show.statisticsTime == null) {
     show.statisticsTime = dayjs(new Date()).format("YYYY-MM-DD")
   }
-  getClassList()
+  if (show.courseList.length == 1 && show.courseList[0].id == null) {
+    getCourseList()
+  }
+  if (show.classList.length == 1 && show.classList[0].id == null) {
+    getClassList()
+  }
 }
 
 /** 获取班级列表 */
 const getClassList = () => {
-  getClassListApi().then((res) => {
+  getListApi(ApiPrefix.class).then((res) => {
     show.classList = res.data
     if (res.data.length > 0) {
       show.classId = res.data[0].id
@@ -51,9 +64,21 @@ const getClassList = () => {
   })
 }
 
+/** 课程列表 */
+const getCourseList = () => {
+  getListApi(ApiPrefix.course).then((res) => {
+    show.courseList = res.data
+    if (res.data.length > 0) {
+      show.courseId = res.data[0].id
+    }
+  })
+}
+
 /** 班级下所有学生 */
 const getStudentList = () => {
-  getStudentListApi(show.classId).then((res) => {
+  getListApi(studentListPrefix, {
+    classId: show.classId
+  }).then((res) => {
     show.studentList = res.data
     show.allTableList = []
     if (res.data.length > 0) {
@@ -61,7 +86,6 @@ const getStudentList = () => {
         show.allTableList.push({
           studentId: item.id,
           studentName: item.name,
-          classId: show.classId,
           completionLevel: 0
         })
       })
@@ -72,7 +96,6 @@ const getStudentList = () => {
 
 /** 表格过滤数据 */
 const filterTableData = () => {
-  console.log(param.studentName)
   if (param.studentName != "") {
     show.filterTableList = show.allTableList.filter((item) => {
       return item.studentName.indexOf(param.studentName) > -1
@@ -80,8 +103,6 @@ const filterTableData = () => {
   } else {
     show.filterTableList = show.allTableList
   }
-  console.log(show.allTableList)
-  console.log(show.filterTableList)
 }
 
 /** 批量新增用户 */
@@ -91,8 +112,10 @@ const batchAdd = () => {
   } else {
     show.allTableList.forEach((item) => {
       item.statisticsTime = show.statisticsTime
+      item.courseId = show.courseId
+      item.classId = show.classId
     })
-    batchAddApi(show.allTableList).then((res) => {
+    batchAddApi(ApiPrefix.work, show.allTableList).then((res) => {
       ElMessage.success(res.data)
       param.dialogVisible = false
       proxy.$emit("refresh")
@@ -118,6 +141,11 @@ defineExpose({
         <el-form-item prop="username" label="班级">
           <el-select v-model="show.classId" @change="getStudentList">
             <el-option v-for="item in show.classList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="username" label="课程">
+          <el-select v-model="show.courseId">
+            <el-option v-for="item in show.courseList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item prop="phone" label="统计日期">

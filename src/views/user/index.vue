@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { ref, reactive } from "vue"
-import { Search, CirclePlus, Plus, Edit, Delete, InfoFilled, RefreshLeft, Upload, Download } from "@element-plus/icons-vue"
+import { Search, CirclePlus, Edit, Delete, InfoFilled, RefreshLeft, Upload, Download } from "@element-plus/icons-vue"
 import UserAddModel from "./UserAddModel.vue"
 import UserEditModel from "./UserEditModel.vue"
 import UserUploadModel from "./UserUploadModel.vue"
 import DataDict from "@/constants/dataDict"
-import { getUserPageListApi, deleteUserApi, restPwdApi, batchDeleteUserApi, exportUserApi } from "@/api/user"
+import ApiPrefix from "@/constants/apiPrefix"
+import { getPageApi, deleteApi, batchDeleteApi, exportApi } from "@/api/common"
+import { restPwdApi } from "@/api/user"
 import { ElMessage } from "element-plus"
 
 const userAddRef = ref()
@@ -26,7 +28,6 @@ const user = reactive({
 
 const handleSelectionChange = (val: Array<object>) => {
   multipleSelection.value = val
-  console.log(multipleSelection.value)
 }
 
 const addUser = () => {
@@ -39,7 +40,7 @@ const editUser = (userId: number) => {
 
 /* 列表 */
 const getUserPageList = () => {
-  getUserPageListApi(user.query).then((res) => {
+  getPageApi(ApiPrefix.user, user.query).then((res) => {
     user.tableList = res.data.records
     user.total = res.data.total
   })
@@ -47,8 +48,7 @@ const getUserPageList = () => {
 
 /* 删除 */
 const deleteUser = (id: number) => {
-  deleteUserApi(id).then((res) => {
-    console.log(res)
+  deleteApi(ApiPrefix.user, id).then((res) => {
     ElMessage.success(res.data)
     getUserPageList()
   })
@@ -61,7 +61,7 @@ const importUser = () => {
 
 /* 导出 */
 const exportUser = () => {
-  exportUserApi(user.query).then((res) => {
+  exportApi(ApiPrefix.user, user.query).then((res) => {
     if (res.status == 200) {
       ElMessage.success("导出成功")
     } else {
@@ -83,7 +83,7 @@ const batchDeleteUser = () => {
   multipleSelection.value.forEach((item) => {
     userIdList.push(item.id)
   })
-  batchDeleteUserApi(userIdList).then((res) => {
+  batchDeleteApi(ApiPrefix.user, userIdList).then((res) => {
     ElMessage.success(res.data)
     getUserPageList()
   })
@@ -129,9 +129,7 @@ getUserPageList()
           title="确认删除选中用户吗"
         >
           <template #reference>
-            <el-button type="danger" :icon="Delete" :disabled="multipleSelection.length === 0">
-              批量删除
-            </el-button>
+            <el-button type="danger" :icon="Delete" :disabled="multipleSelection.length === 0"> 批量删除 </el-button>
           </template>
         </el-popconfirm>
         <el-button type="warning" :icon="Upload" @click="importUser">导入</el-button>
@@ -154,16 +152,9 @@ getUserPageList()
           </el-table-column>
           <el-table-column prop="birthDay" label="生日" />
           <el-table-column prop="phone" label="联系方式" />
-          <el-table-column label="操作" width="180">
+          <el-table-column label="操作" width="190">
             <template #default="scope">
-              <el-button
-                type="primary"
-                :icon="Edit"
-                size="small"
-                color="#626aef"
-                title="修改"
-                @click="editUser(scope.row.id)"
-              />
+              <el-button :icon="Edit" color="rgb(80 218 186 / 73%)" @click="editUser(scope.row.id)" title="修改" />
               <el-popconfirm
                 width="220"
                 confirm-button-text="确定"
@@ -174,7 +165,7 @@ getUserPageList()
                 title="确认删除用户吗"
               >
                 <template #reference>
-                  <el-button type="danger" :icon="Delete" size="small" title="删除" />
+                  <el-button type="danger" :icon="Delete" title="删除" />
                 </template>
               </el-popconfirm>
               <el-popconfirm
@@ -187,7 +178,7 @@ getUserPageList()
                 title="确认重置密码吗"
               >
                 <template #reference>
-                  <el-button type="danger" :icon="RefreshLeft" size="small" title="重置密码" />
+                  <el-button color="#3c64e6b3" :icon="RefreshLeft" title="重置密码" />
                 </template>
               </el-popconfirm>
             </template>
@@ -221,5 +212,9 @@ getUserPageList()
   :deep(.el-card__body) {
     padding-bottom: 2px;
   }
+}
+.el-popper.is-customized {
+  padding: 6px 12px;
+  background: linear-gradient(90deg, rgb(159, 229, 151), rgb(204, 229, 129));
 }
 </style>

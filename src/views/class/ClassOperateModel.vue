@@ -2,7 +2,9 @@
 import { reactive, ref } from "vue"
 import type { FormInstance, FormRules } from "element-plus"
 import { ElMessage } from "element-plus"
-import { getClassTeacherListApi, getClassDetailApi, addClassApi, editClassApi } from "@/api/class"
+import ApiPrefix from "@/constants/apiPrefix"
+import { getDetailApi, getListApi, addApi, updateApi } from "@/api/common"
+import { teacherListPrefix } from "@/api/class"
 import { getCurrentInstance, ComponentInternalInstance } from "vue"
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
@@ -18,7 +20,12 @@ const show = reactive({
     classTeacherId: null,
     slogan: null
   },
-  teacherList: []
+  teacherList: [
+    {
+      id: 0,
+      name: ""
+    }
+  ]
 })
 
 const operateFormRef = ref<FormInstance>()
@@ -31,6 +38,11 @@ const open = (classId) => {
   param.dialogVisible = true
   if (classId == null) {
     param.addFlag = true
+    show.data = {
+      name: null,
+      classTeacherId: null,
+      slogan: null
+    }
   } else {
     param.addFlag = false
     getDetail(classId)
@@ -40,14 +52,16 @@ const open = (classId) => {
 
 /** 查询 */
 const getDetail = (id: number) => {
-  getClassDetailApi(id).then((res) => {
+  getDetailApi(ApiPrefix.class, { classId: id }).then((res) => {
     show.data = res.data
   })
 }
 
 /** 班主任列表 */
 const getClassTeacherList = (id: number) => {
-  getClassTeacherListApi(id).then((res) => {
+  getListApi(teacherListPrefix, {
+    classId: id
+  }).then((res) => {
     show.teacherList = res.data
   })
 }
@@ -56,8 +70,8 @@ const getClassTeacherList = (id: number) => {
 const operate = () => {
   operateFormRef.value?.validate((valid: boolean) => {
     if (valid) {
-      const fun = param.addFlag ? addClassApi : editClassApi
-      fun(show.data).then((res) => {
+      const fun = param.addFlag ? addApi : updateApi
+      fun(ApiPrefix.class, show.data).then((res) => {
         ElMessage.success(res.data)
         param.dialogVisible = false
         proxy.$emit("refresh")
@@ -74,7 +88,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="param.dialogVisible" :title="param.addFlag ? '新增' : '修改'" max>
+  <el-dialog v-model="param.dialogVisible" :close-on-click-modal="false" :title="param.addFlag ? '新增' : '修改'">
     <el-card shadow="never" style="margin: 0 20px">
       <el-form ref="operateFormRef" :model="show.data" :rules="operateRules" label-width="120px">
         <el-form-item label="班级" prop="name">

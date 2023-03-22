@@ -2,10 +2,11 @@
 import { reactive, ref } from "vue"
 import { Upload } from "@element-plus/icons-vue"
 import { ElMessage } from "element-plus"
-import { importUserApi } from "@/api/user"
 import { getCurrentInstance, ComponentInternalInstance } from "vue"
 import { genFileId } from "element-plus"
 import type { UploadInstance, UploadProps, UploadRawFile } from "element-plus"
+import ApiPrefix from "@/constants/apiPrefix"
+import { importUrl } from "@/api/common"
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const upload = ref<UploadInstance>()
@@ -41,6 +42,7 @@ const handleError = (error: Error) => {
 const handleSuccess = (response: any) => {
   if (response.code === 0) {
     ElMessage.success(response.data)
+    param.dialogVisible = false
     proxy.$emit("refresh")
   } else {
     ElMessage.error(response.message)
@@ -53,11 +55,12 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="param.dialogVisible" title="用户导入">
+  <el-dialog v-model="param.dialogVisible" :close-on-click-modal="false" title="用户导入">
+    <div style="margin-bottom: 20px"><i>注：导入数据格式参考导出格式</i></div>
     <el-card shadow="never">
       <el-upload
         ref="upload"
-        :action="importUserApi"
+        :action="importUrl(ApiPrefix.user)"
         :limit="1"
         :auto-upload="false"
         :on-exceed="handleExceed"

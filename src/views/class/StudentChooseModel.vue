@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import { reactive, ref } from "vue"
-import type { FormInstance, FormRules } from "element-plus"
+import { reactive } from "vue"
 import { ElMessage } from "element-plus"
-import { getStudentListApi, getOperateStudentListApi, batchOperateApi } from "@/api/class"
+import { getListApi } from "@/api/common"
+import { studentListPrefix, operateStudentListPrefix, batchOperateApi } from "@/api/class"
 import { getCurrentInstance, ComponentInternalInstance } from "vue"
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
 
 const param = reactive({
   dialogVisible: false,
-  classId: null
+  classId: null,
+  submitFlag: false
 })
 
 const show = reactive({
@@ -21,22 +22,25 @@ const show = reactive({
 const open = (classId) => {
   param.dialogVisible = true
   param.classId = classId
+  param.submitFlag = false
   getStudentList()
   getOperateStudentList()
 }
 
-/** 班级内学生列表 */
+/** 班级内已绑定学生列表 */
 const getStudentList = () => {
-  getStudentListApi(param.classId).then((res) => {
+  show.classStudentIdList = []
+  getListApi(studentListPrefix, { classId: param.classId }).then((res) => {
     res.data.forEach((item) => {
       show.classStudentIdList.push(item.id)
     })
   })
 }
 
-/** 可操作学生列表 */
+/** 所有可操作学生列表 */
 const getOperateStudentList = () => {
-  getOperateStudentListApi(param.classId).then((res) => {
+  show.operateStudentList = []
+  getListApi(operateStudentListPrefix, { classId: param.classId }).then((res) => {
     show.operateStudentList = res.data
   })
 }
@@ -48,6 +52,7 @@ const filterMethod = (query, item) => {
 
 /** 批量处理 */
 const batchChoose = () => {
+  param.submitFlag = true
   batchOperateApi(param.classId, show.classStudentIdList).then((res) => {
     ElMessage.success(res.data)
     param.dialogVisible = false
@@ -61,10 +66,10 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog v-model="param.dialogVisible" title="学生选择" max>
-    <el-card style="margin: 0 20px">
+  <el-dialog v-model="param.dialogVisible" :close-on-click-modal="false" top="5vh" title="班级管理">
+    <el-card style="margin: 0 40px">
       <el-transfer
-        style="padding: 20px 40px"
+        style=""
         v-model="show.classStudentIdList"
         :titles="['所有学生', '选中学生']"
         :props="{
@@ -79,8 +84,23 @@ defineExpose({
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="param.dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="batchChoose">确定</el-button>
+        <el-button type="primary" :disabled="param.submitFlag" @click="batchChoose">确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
+
+<style lang="scss" scoped>
+.el-transfer {
+  padding: 20px 30px;
+  :deep(.el-transfer-panel) {
+    width: 300px;
+  }
+  :deep(.el-transfer-panel__body) {
+    height: calc(90vh - 300px);
+  }
+  :deep(.el-transfer-panel__body) {
+    width: 250px;
+  }
+}
+</style>
