@@ -19,19 +19,20 @@ const param = reactive({
 const show = reactive({
   courseList: [
     {
-      id: null,
+      id: 0,
       name: ""
     }
   ],
   classList: [
     {
-      id: null,
+      id: 0,
       name: ""
     }
   ],
-  courseId: null,
+  courseId: 0,
   classId: 1,
-  statisticsTime: null,
+  type: 0,
+  examinationTime: null,
   studentList: [],
   allTableList: [],
   filterTableList: []
@@ -40,15 +41,13 @@ const show = reactive({
 /** 打开弹窗 */
 const open = () => {
   param.dialogVisible = true
-  if (show.statisticsTime == null) {
-    show.statisticsTime = dayjs(new Date()).format("YYYY-MM-DD")
+  if (show.examinationTime == null) {
+    show.examinationTime = dayjs(new Date()).format("YYYY-MM-DD")
   }
-  if (show.courseList.length == 1 && show.courseList[0].id == null) {
+  if (show.courseList.length == 1) {
     getCourseList()
   }
-  if (show.classList.length == 1 && show.classList[0].id == null) {
-    getClassList()
-  }
+  getClassList()
 }
 
 /** 获取班级列表 */
@@ -86,7 +85,7 @@ const getStudentList = () => {
         show.allTableList.push({
           studentId: item.id,
           studentName: item.name,
-          completionLevel: 0
+          score: ""
         })
       })
       filterTableData()
@@ -111,11 +110,14 @@ const batchAdd = () => {
     ElMessage.error("新增数据为空")
   } else {
     show.allTableList.forEach((item) => {
-      item.statisticsTime = show.statisticsTime
-      item.courseId = show.courseId
-      item.classId = show.classId
+      if (item.score != null && item.score != "") {
+        item.examinationTime = show.examinationTime
+        item.type = show.type
+        item.courseId = show.courseId
+        item.classId = show.classId
+      }
     })
-    batchAddApi(ApiPrefix.work, show.allTableList).then((res) => {
+    batchAddApi(ApiPrefix.examinationResult, show.allTableList).then((res) => {
       ElMessage.success(res.data)
       param.dialogVisible = false
       proxy.$emit("refresh")
@@ -131,25 +133,35 @@ defineExpose({
 <template>
   <el-dialog
     v-model="param.dialogVisible"
-    title="作业完成情况新增"
+    title="考试成绩录入"
     :close-on-click-modal="false"
     top="5vh"
     style="height: 90vh"
   >
     <el-card class="search-wrapper">
       <el-form :inline="true">
-        <el-form-item prop="username" label="班级">
+        <el-form-item label="班级">
           <el-select v-model="show.classId" @change="getStudentList">
             <el-option v-for="item in show.classList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item prop="username" label="课程">
+        <el-form-item label="课程">
           <el-select v-model="show.courseId">
             <el-option v-for="item in show.courseList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item prop="phone" label="统计日期">
-          <el-date-picker v-model="show.statisticsTime" :clearable="false" value-format="YYYY-MM-DD" type="date" />
+        <el-form-item label="类型">
+          <el-select v-model="show.type">
+            <el-option
+              v-for="item in DataDict.list.examinationType"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="考试日期">
+          <el-date-picker v-model="show.examinationTime" :clearable="false" value-format="YYYY-MM-DD" type="date" />
         </el-form-item>
       </el-form>
     </el-card>
@@ -165,16 +177,9 @@ defineExpose({
         <el-table :data="show.filterTableList" stripe style="width: 100%; height: calc(90vh - 360px)">
           <el-table-column type="index" />
           <el-table-column prop="studentName" label="学生" />
-          <el-table-column label="完成情况">
+          <el-table-column label="成绩">
             <template #default="scope">
-              <el-select v-model="scope.row.completionLevel">
-                <el-option
-                  v-for="item in DataDict.list.work"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
+              <el-input v-model="scope.row.score" type="number" />
             </template>
           </el-table-column>
         </el-table>
@@ -202,5 +207,9 @@ defineExpose({
   :deep(.el-card__body) {
     padding-bottom: 2px;
   }
+}
+
+.el-select {
+  width: 150px;
 }
 </style>

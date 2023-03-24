@@ -9,7 +9,7 @@ import Breadcrumb from "../Breadcrumb/index.vue"
 import Hamburger from "../Hamburger/index.vue"
 import ThemeSwitch from "@/components/ThemeSwitch/index.vue"
 import Screenfull from "@/components/Screenfull/index.vue"
-import Notify from "@/components/Notify/index.vue"
+// import Notify from "@/components/Notify/index.vue"
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -45,7 +45,7 @@ const logout = () => {
     <div class="right-menu">
       <Screenfull v-if="showScreenfull" class="right-menu-item" />
       <ThemeSwitch v-if="showThemeSwitch" class="right-menu-item" />
-      <Notify v-if="showNotify" class="right-menu-item" />
+<!--      <Notify v-if="showNotify" class="right-menu-item" />-->
       <el-dropdown class="right-menu-item">
         <div class="right-menu-avatar">
           <el-avatar :icon="UserFilled" :size="30" />
@@ -53,15 +53,15 @@ const logout = () => {
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <a target="_blank" href="https://juejin.cn/post/7089377403717287972">
-              <el-dropdown-item>中文文档</el-dropdown-item>
-            </a>
-            <a target="_blank" href="https://github.com/un-pany/v3-admin-vite">
-              <el-dropdown-item>GitHub</el-dropdown-item>
-            </a>
-            <a target="_blank" href="https://gitee.com/un-pany/v3-admin-vite">
-              <el-dropdown-item>Gitee</el-dropdown-item>
-            </a>
+<!--            <a target="_blank" href="https://juejin.cn/post/7089377403717287972">-->
+<!--              <el-dropdown-item>中文文档</el-dropdown-item>-->
+<!--            </a>-->
+<!--            <a target="_blank" href="https://github.com/un-pany/v3-admin-vite">-->
+<!--              <el-dropdown-item>GitHub</el-dropdown-item>-->
+<!--            </a>-->
+<!--            <a target="_blank" href="https://gitee.com/un-pany/v3-admin-vite">-->
+<!--              <el-dropdown-item>Gitee</el-dropdown-item>-->
+<!--            </a>-->
             <el-dropdown-item divided @click="logout">
               <span style="display: block">退出登录</span>
             </el-dropdown-item>

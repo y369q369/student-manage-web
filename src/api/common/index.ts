@@ -1,5 +1,5 @@
 import { exportData, request } from "@/utils/service"
-import { PageListResponseData } from "@/api/common/types/common"
+import { PageListResponseData } from "@/../types/api"
 
 /** 获取分页列表 */
 export function getPageApi(prefix: string, params: object) {

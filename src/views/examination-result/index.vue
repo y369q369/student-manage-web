@@ -3,29 +3,32 @@ import { reactive, ref, onMounted } from "vue"
 import { Search, Edit, Delete, InfoFilled, Refresh, CirclePlus, Select, CloseBold } from "@element-plus/icons-vue"
 import { ElMessage } from "element-plus"
 import DataDict from "@/constants/dataDict"
-import WorkAddModel from "./WorkAddModel.vue"
+import WorkAddModel from "./ExaminationAddModel.vue"
 import ApiPrefix from "@/constants/apiPrefix"
 import { getListApi, getPageApi, getPieApi, updateApi, batchDeleteApi } from "@/api/common"
 import * as echarts from "echarts"
 
-const workAddRef = ref()
+const addRef = ref()
 const pieRef = ref()
 const multipleSelection = ref<object[]>([])
 
-const defaultWork = {
+const defaultExamination = {
   studentName: "",
   classId: null,
   courseId: null,
-  completionLevel: null,
-  statisticsTimeSt: null,
-  statisticsTimeEt: null,
+  operateSymbolMark: null,
+  typeList: "",
+  score: null,
+  examinationTimeSt: null,
+  examinationTimeEt: null,
   pageNo: 1,
   pageSize: 10
 }
 
 const param = reactive({
-  work: { ...defaultWork },
-  statisticsTime: []
+  examinationResult: { ...defaultExamination },
+  examinationTime: [],
+  typeList: []
 })
 
 const show = reactive({
@@ -47,7 +50,7 @@ const show = reactive({
 
 const pieOption = {
   title: {
-    text: "完成情况统计",
+    text: "成绩分布统计",
     left: "center"
   },
   tooltip: {
@@ -75,16 +78,16 @@ const handleSelectionChange = (val: Array<object>) => {
 }
 
 const handleSearch = (flag: boolean) => {
-  if (param.work.pageNo !== 1) {
-    param.work.pageNo = 1
+  if (param.examinationResult.pageNo !== 1) {
+    param.examinationResult.pageNo = 1
   }
-  getWorkPageList()
+  getPageList()
   if (flag) {
-    getWorkEchartsPie()
+    getEchartsPie()
   }
 }
 const resetSearch = () => {
-  param.work = { ...defaultWork }
+  param.examinationResult = { ...defaultExamination }
   param.statisticsTime = []
 }
 
@@ -105,66 +108,60 @@ const getClassList = () => {
   })
 }
 
-const getWorkPageList = () => {
-  if (param.statisticsTime.length > 0) {
-    param.work.statisticsTimeEt = param.statisticsTime[1]
-    param.work.statisticsTimeSt = param.statisticsTime[0]
+const getPageList = () => {
+  if (param.examinationTime.length > 0) {
+    param.examinationResult.examinationTimeSt = param.examinationTime[0]
+    param.examinationResult.examinationTimeEt = param.examinationTime[1]
   }
-  getPageApi(ApiPrefix.work, param.work).then((res) => {
+  if (param.typeList.length > 0) {
+    param.examinationResult.typeList = param.typeList.join()
+  }
+  getPageApi(ApiPrefix.examinationResult, param.examinationResult).then((res) => {
     show.tableList = res.data.records
     show.total = res.data.total
   })
 }
 
-const getWorkEchartsPie = () => {
-  getPieApi(ApiPrefix.work, param.work).then((res) => {
-    let pieData = []
-    if (res.data.length > 0) {
-      pieData = res.data.map((item) => {
-        return {
-          name: DataDict.type.work[item.id],
-          value: item.value
-        }
-      })
-    }
+const getEchartsPie = () => {
+  getPieApi(ApiPrefix.examinationResult, param.examinationResult).then((res) => {
     pieRef.value.setOption({
       series: {
-        data: pieData
+        data: res.data
       }
     })
   })
 }
 
-const updateWork = (data) => {
-  updateApi(ApiPrefix.work, data).then((res) => {
+const update = (data) => {
+  updateApi(ApiPrefix.examinationResult, data).then((res) => {
     ElMessage.success(res.data)
     handleSearch(true)
   })
 }
 
-const batchDeleteWork = () => {
+const batchDelete = () => {
   const idList: number[] = []
   multipleSelection.value.forEach((item) => {
     idList.push(item.id)
   })
-  batchDeleteApi(ApiPrefix.work, idList).then((res) => {
+  batchDeleteApi(ApiPrefix.examinationResult, idList).then((res) => {
     ElMessage.success(res.data)
-    getWorkPageList()
+    getPageList()
   })
 }
 const addWork = () => {
-  workAddRef.value.open()
+  addRef.value.open()
 }
 
 onMounted(() => {
   pieRef.value = echarts.init(document.getElementById("myChart"))
   pieRef.value.setOption(pieOption)
-  getWorkEchartsPie()
+  getEchartsPie()
 })
 
 getCourseList()
 getClassList()
-getWorkPageList()
+getPageList()
 </script>
 
 <template>
@@ -172,32 +169,42 @@ getWorkPageList()
     <el-card shadow="never" class="search-wrapper">
       <el-form :inline="true">
         <el-form-item prop="phone" label="班级">
-          <el-select v-model="param.work.classId" clearable>
+          <el-select v-model="param.examinationResult.classId" clearable>
             <el-option v-for="item in show.classList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item prop="phone" label="课程">
-          <el-select v-model="param.work.courseId" clearable>
+          <el-select v-model="param.examinationResult.courseId" clearable>
             <el-option v-for="item in show.courseList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item prop="username" label="学生">
-          <el-input v-model="param.work.studentName" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item prop="phone" label="完成情况">
-          <el-select v-model="param.work.completionLevel" clearable>
+        <el-form-item label="类型">
+          <el-select v-model="param.typeList" multiple collapse-tags collapse-tags-tooltip>
             <el-option
-              v-for="item in DataDict.list.work"
+              v-for="item in DataDict.list.examinationType"
               :key="item.value"
               :label="item.label"
               :value="item.value"
-              size="large"
             />
           </el-select>
         </el-form-item>
-        <el-form-item prop="phone" label="统计日期">
+        <el-form-item prop="phone" label="成绩">
+          <el-select v-model="param.examinationResult.operateSymbolMark" clearable style="width: 90px">
+            <el-option
+              v-for="item in DataDict.list.operationSymbol"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <el-input v-model="param.examinationResult.score" style="width: 120px; margin-left: 5px" />
+        </el-form-item>
+        <el-form-item prop="username" label="学生">
+          <el-input v-model="param.examinationResult.studentName" />
+        </el-form-item>
+        <el-form-item prop="phone" label="考试日期">
           <el-date-picker
-            v-model="param.statisticsTime"
+            v-model="param.examinationTime"
             type="daterange"
             range-separator="~"
             style="width: 250px"
@@ -223,7 +230,7 @@ getWorkPageList()
                 cancel-button-text="取消"
                 :icon="InfoFilled"
                 icon-color="#626AEF"
-                @confirm="batchDeleteWork"
+                @confirm="batchDelete"
                 title="确认删除选中记录吗"
               >
                 <template #reference>
@@ -239,28 +246,25 @@ getWorkPageList()
                 <el-table-column prop="className" label="班级" />
                 <el-table-column prop="courseName" label="课程" />
                 <el-table-column prop="studentName" label="学生" />
-                <el-table-column prop="statisticsTime" label="统计日期" />
-                <el-table-column label="完成情况">
+                <el-table-column prop="examinationTime" label="考试日期" />
+                <el-table-column label="类型">
                   <template #default="scope">
-                    <span v-show="!scope.row.updateFlag">{{ DataDict.type.work[scope.row.completionLevel] }}</span>
-                    <el-select v-show="scope.row.updateFlag" v-model="scope.row.completionLevel">
-                      <el-option
-                        v-for="item in DataDict.list.work"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                        size="large"
-                      />
-                    </el-select>
+                    {{ DataDict.type.examinationType[scope.row.type] }}
                   </template>
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="分数">
+                  <template #default="scope">
+                    <span v-show="!scope.row.updateFlag">{{ scope.row.score }}</span>
+                    <el-input v-show="scope.row.updateFlag" v-model="scope.row.score" />
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="200px">
                   <template #default="scope">
                     <div v-show="!scope.row.updateFlag">
                       <el-button type="primary" :icon="Edit" @click="scope.row.updateFlag = true">修改</el-button>
                     </div>
                     <div v-show="scope.row.updateFlag">
-                      <el-button type="success" :icon="Select" @click="updateWork(scope.row)">提交</el-button>
+                      <el-button type="success" :icon="Select" @click="update(scope.row)">提交</el-button>
                       <el-button :icon="CloseBold" @click="scope.row.updateFlag = false">取消</el-button>
                     </div>
                   </template>
@@ -275,11 +279,11 @@ getWorkPageList()
                 :hide-on-single-page="false"
                 :pager-count="5"
                 :page-sizes="[10, 20, 50, 100]"
-                v-model:current-page="param.work.pageNo"
-                v-model:page-size="param.work.pageSize"
+                v-model:current-page="param.examinationResult.pageNo"
+                v-model:page-size="param.examinationResult.pageSize"
                 :total="show.total"
-                @size-change="getWorkPageList"
-                @current-change="getWorkPageList"
+                @size-change="getPageList"
+                @current-change="getPageList"
               />
             </div>
           </el-card>
@@ -291,7 +295,7 @@ getWorkPageList()
         </el-main>
       </el-container>
     </el-card>
-    <WorkAddModel ref="workAddRef" @refresh="handleSearch(true)" style="width: 60%" />
+    <WorkAddModel ref="addRef" @refresh="handleSearch(true)" style="width: 60%" />
   </div>
 </template>
 
